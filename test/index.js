@@ -9,76 +9,134 @@ const bridgePlugin = require('..');
 const resolveFixture = (...x) => path.resolve(__dirname, 'fixtures', ...x);
 
 describe('Main tests', () => {
-  it('should work with regexp', done => {
-    runTest(
-      'regexp',
-      done,
-      {
-        module: {
-          rules: [
-            {
-              test: /\.js$/,
-              use: [
-                {
-                  loader: 'babel-loader',
-                  options: {
-                    presets: [
-                      ['@babel/preset-env', { targets: { ie: 11 } }],
-                    ],
+  it('should work with loader whose test defined as regexp', done => {
+    const folder = 'regexp';
+    const output = readFixture(folder, 'output.js');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      plugins: [
+        bridgePlugin({
+          module: {
+            rules: [
+              {
+                test: /\.js$/,
+                esbuildLoader: 'js',
+                use: [
+                  {
+                    loader: 'babel-loader',
+                    options: {
+                      presets: [
+                        ['@babel/preset-env', { targets: { ie: 11 } }],
+                      ],
+                    },
                   },
-                },
-              ],
-            },
-          ],
-        },
-      },
-    );
+                ],
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
   });
 
-  it('should work with imports', done => {
-    runTest(
-      'imports',
-      done,
-      {
-        module: {
-          rules: [
-            {
-              test: /\.js$/,
-              use: [
-                {
-                  loader: 'babel-loader',
-                  options: {
-                    presets: [
-                      ['@babel/preset-env', { targets: { ie: 11 } }],
-                    ],
+  it('should work with several files imported one into another', done => {
+    const folder = 'imports';
+    const output = readFixture(folder, 'output.js');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      plugins: [
+        bridgePlugin({
+          module: {
+            rules: [
+              {
+                test: /\.js$/,
+                esbuildLoader: 'js',
+                use: [
+                  {
+                    loader: 'babel-loader',
+                    options: {
+                      presets: [
+                        ['@babel/preset-env', { targets: { ie: 11 } }],
+                      ],
+                    },
                   },
-                },
-              ],
-            },
-          ],
-        },
-      },
-    );
+                ],
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+  });
+
+  it('should work with scss', done => {
+    const folder = 'scss';
+    const outputJS = readFixture(folder, 'output.js');
+    const outputCSS = readFixture(folder, 'output.css');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      outdir: 'outdir',
+      plugins: [
+        bridgePlugin({
+          module: {
+            rules: [
+              {
+                test: /\.scss$/,
+                esbuildLoader: 'css',
+                use: [
+                  {
+                    loader: 'sass-loader',
+                    options: {
+                      implementation: require('sass'),
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.deepStrictEqual(res.outputFiles[0].text, outputJS);
+        assert.deepStrictEqual(res.outputFiles[1].text, outputCSS);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
   });
 });
 
-function runTest(name, done, pluginSettings) {
-  const output = fs.readFileSync(resolveFixture(name, 'output.js'), 'utf-8');
-
-  esbuild.build({
-    entryPoints: [resolveFixture(name, 'input.js')],
-    nodePaths: [resolveFixture(name)],
-    write: false,
-    minify: true,
-    bundle: true,
-    plugins: [
-      bridgePlugin(pluginSettings),
-    ],
-  })
-    .then(res => {
-      done(assert.deepStrictEqual(res.outputFiles[0].text, output));
-    })
-    .catch(err => {
-      done(err);
-    });
+function readFixture(...pathParts) {
+  return fs.readFileSync(resolveFixture(...pathParts), 'utf-8');
 }

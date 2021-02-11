@@ -1,6 +1,8 @@
 const path = require('path');
 
 const { runLoaders } = require('loader-runner');
+const { getOptions } = require('loader-utils');
+const enhancedResolve = require('enhanced-resolve');
 
 module.exports = (options = {}) => {
   const { module: { rules = [] } = {} } = options;
@@ -23,7 +25,7 @@ let ruleCounter = 1;
 function buildRuleMeta(rule) {
   log('Build meta for rule', ruleCounter);
 
-  const supportedRuleProperties = ['test', 'use'];
+  const supportedRuleProperties = ['test', 'use', 'esbuildLoader'];
 
   if (Object.keys(rule).some(key => !supportedRuleProperties.includes(key))) {
     throw new Error(`Rule properties other than '${supportedRuleProperties.join(', ')}' are not supported yet.`);
@@ -37,6 +39,7 @@ function buildRuleMeta(rule) {
     namespace,
     test: rule.test,
     use: rule.use,
+    loader: rule.esbuildLoader,
   };
 }
 
@@ -92,6 +95,10 @@ function registerRuleOnLoad(ruleMeta, build) {
     runLoaders({
       resource: args.path,
       loaders: ruleMeta.use,
+      context: {
+        getOptions,
+        getResolve,
+      },
     }, (err, res) => {
       if (err) {
         log('Error occurred while running loaders for', args.path, 'using rule with namespace', args.namespace);
@@ -115,6 +122,7 @@ function registerRuleOnLoad(ruleMeta, build) {
         //  according to the doc result should be Buffer or String, but it's an array with String inside. why?
         contents: res.result[0],
         resolveDir: path.dirname(args.path),
+        loader: ruleMeta.loader,
       });
     });
   }));
@@ -124,6 +132,33 @@ function registerRuleOnLoad(ruleMeta, build) {
 //   // $& means the whole matched string
 //   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // }
+
+// sass-loader relies on this context method:
+// https://github.com/webpack-contrib/sass-loader/blob/58858f577fb89c9d6bcdfd2874230edf332123c0/src/utils.js#L464
+// https://github.com/webpack-contrib/sass-loader/blob/58858f577fb89c9d6bcdfd2874230edf332123c0/src/utils.js#L354-L368
+// https://webpack.js.org/api/loaders/#thisgetresolve
+// webpack uses inside enhanced-resolve module:
+// https://github.com/webpack/webpack/blob/2acc6c48b62fcad91b29b58688a998cf52bf82a0/lib/ResolverFactory.js
+// so we are
+function getResolve(options) {
+  const resolver = enhancedResolve.create(options);
+
+  return (context, request, callback) => {
+    if (callback) {
+      return resolver(context, request, callback);
+    }
+
+    return new Promise((resolve, reject) => {
+      resolver(context, request, (err, result) => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(result);
+      });
+    });
+  };
+}
 
 function log(...args) {
   if (process.env.DEBUG) {
