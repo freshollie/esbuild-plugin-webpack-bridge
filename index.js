@@ -8,7 +8,7 @@ module.exports = (options = {}) => {
   return {
     name: 'webpack-bridge',
     setup(build) {
-      log('Setup, rules number found:', rules.length);
+      log('Setup, rules found:', rules.length);
 
       for (let i = 0; i < rules.length; i++) {
         const meta = buildRuleMeta(rules[i]);
@@ -46,6 +46,7 @@ function registerRuleOnResolve(ruleMeta, build) {
   if (ruleMeta.test instanceof RegExp) {
     log(ruleMeta.namespace, 'is regexp rule');
 
+    // we do not register 'file' namespace here, because the root file won't be processed
     build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta));
     return;
   }
@@ -60,7 +61,7 @@ function registerRuleOnResolve(ruleMeta, build) {
   //   return;
   // }
 
-  throw new Error('\'test\' property of webpack rules should be RegExp. Other types are not supported yet.');
+  throw new Error('\'test\' property of webpack rules should be RegExp. Other types are not supported yet.\'');
   // console.warn('`test` property of webpack rules should be RegExp. Other types make ESBuild slower. Read more: https://esbuild.github.io/plugins/#filters');
 }
 
@@ -73,8 +74,6 @@ function buildResolveCallback(ruleMeta) {
     if (args.path.includes('!')) {
       throw new Error(`Can not load '${args.path}'. Inline loaders are not supported yet.`);
     }
-
-    ruleMeta.resolveDir = args.resolveDir; // TODO: make it cleaner?
 
     return {
       path: path.resolve(args.resolveDir, args.path),
@@ -94,7 +93,7 @@ function registerRuleOnLoad(ruleMeta, build) {
       loaders: ruleMeta.use,
     }, (err, res) => {
       if (err) {
-        log('Error occurred while running loaders for', args.path, 'using rule with namespace', ruleMeta.namespace, '—', err);
+        log('Error occurred while running loaders for', args.path, 'using rule with namespace', ruleMeta.namespace);
 
         // TODO: add more info?
         // https://nodejs.org/api/errors.html
@@ -114,7 +113,7 @@ function registerRuleOnLoad(ruleMeta, build) {
         // TODO: https://github.com/webpack/loader-runner
         //  according to the doc result should be Buffer or String, but it's an array with String inside. why?
         contents: res.result[0],
-        resolveDir: ruleMeta.resolveDir,
+        resolveDir: path.dirname(args.path),
       });
     });
   }));
