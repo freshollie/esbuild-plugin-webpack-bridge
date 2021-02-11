@@ -50,17 +50,17 @@ function registerRuleOnResolve(ruleMeta, build) {
     return;
   }
 
-  if (typeof ruleMeta.test === 'string') {
-    log(ruleMeta.namespace, 'is string rule');
+  // if (typeof ruleMeta.test === 'string') {
+  //   log(ruleMeta.namespace, 'is string rule');
+  //
+  //   // TODO: do we need ^ & $ here?
+  //   const re = new RegExp(`^${escapeRegExp(ruleMeta.test)}$`);
+  //
+  //   build.onResolve({ filter: re }, buildResolveCallback(ruleMeta));
+  //   return;
+  // }
 
-    // TODO: do we need ^ & $ here?
-    const re = new RegExp(`^${escapeRegExp(ruleMeta.test)}$`);
-
-    build.onResolve({ filter: re }, buildResolveCallback(ruleMeta));
-    return;
-  }
-
-  throw new Error('\'test\' property of webpack rules should be RegExp or string. Other types are not supported yet.');
+  throw new Error('\'test\' property of webpack rules should be RegExp. Other types are not supported yet.');
   // console.warn('`test` property of webpack rules should be RegExp. Other types make ESBuild slower. Read more: https://esbuild.github.io/plugins/#filters');
 }
 
@@ -120,10 +120,10 @@ function registerRuleOnLoad(ruleMeta, build) {
   }));
 }
 
-function escapeRegExp(string) {
-  // $& means the whole matched string
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+// function escapeRegExp(string) {
+//   // $& means the whole matched string
+//   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// }
 
 function log(...args) {
   if (process.env.DEBUG) {
