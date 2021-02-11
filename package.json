@@ -8,6 +8,9 @@
     "lint": "eslint .",
     "postinstall": "husky install"
   },
+  "files": [
+    "index.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/igoradamenko/esbuild-plugin-webpack-bridge.git"
