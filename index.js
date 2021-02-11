@@ -46,7 +46,7 @@ function registerRuleOnResolve(ruleMeta, build) {
   if (ruleMeta.test instanceof RegExp) {
     log(ruleMeta.namespace, 'is regexp rule');
 
-    build.onResolve({ filter: ruleMeta.test, namespace: 'file' }, buildResolveCallback(ruleMeta));
+    build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta));
     return;
   }
 
@@ -56,7 +56,7 @@ function registerRuleOnResolve(ruleMeta, build) {
     // TODO: do we need ^ & $ here?
     const re = new RegExp(`^${escapeRegExp(ruleMeta.test)}$`);
 
-    build.onResolve({ filter: re, namespace: 'file' }, buildResolveCallback(ruleMeta));
+    build.onResolve({ filter: re }, buildResolveCallback(ruleMeta));
     return;
   }
 
