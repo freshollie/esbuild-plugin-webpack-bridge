@@ -4,7 +4,7 @@
   "description": "Allows to use webpack loaders with esbuild",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "lint": "eslint .",
     "postinstall": "husky install"
   },
@@ -27,10 +27,16 @@
     "loader-runner": "4.2.0"
   },
   "devDependencies": {
+    "@babel/core": "7.12.13",
+    "@babel/preset-env": "7.12.13",
     "@funboxteam/eslint-config": "5.3.0",
+    "babel-loader": "8.2.2",
+    "esbuild": "0.8.44",
     "eslint": "7.19.0",
     "husky": "5.0.9",
-    "lint-staged": "10.5.4"
+    "lint-staged": "10.5.4",
+    "mocha": "8.2.1",
+    "webpack": "5.21.2"
   },
   "lint-staged": {
     "*.js": "eslint --fix"
