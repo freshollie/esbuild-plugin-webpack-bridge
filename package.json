@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/igoradamenko/esbuild-plugin-webpack-bridge/issues"
   },
-  "homepage": "https://github.com/igoradamenko/esbuild-plugin-webpack-bridge#readme"
+  "homepage": "https://github.com/igoradamenko/esbuild-plugin-webpack-bridge#readme",
+  "dependencies": {
+    "loader-runner": "4.2.0"
+  }
 }
