@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (11.02.2021)
+
+Implemented shims to make sass-loader work. 
+
+API has been slightly changed. Now each rule has to contain string `esbuildLoader` field that sets esbuild loader
+that will be used after webpack loaders. Read more about esbuild loaders in [esbuild docs](https://esbuild.github.io/content-types/).
+
+
 ## 0.1.0 (11.02.2021)
 
 Initial version.

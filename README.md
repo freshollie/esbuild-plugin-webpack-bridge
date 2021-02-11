@@ -36,6 +36,7 @@ esbuild.build({
         rules: [
           {
             test: /\.jsx?$/,
+            esbuildLoader: 'js',
             use: [
               {
                 loader: 'babel-loader',
@@ -43,6 +44,18 @@ esbuild.build({
                   presets: [
                     ['@babel/preset-env', { targets: { ie: 11 } }],
                   ],
+                },
+              },
+            ],
+          },
+          {
+            test: /\.scss$/,
+            esbuildLoader: 'css',
+            use: [
+              {
+                loader: 'sass-loader',
+                options: {
+                  implementation: require('sass'),
                 },
               },
             ],

@@ -1,6 +1,6 @@
 {
   "name": "esbuild-plugin-webpack-bridge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Allows to use webpack loaders with esbuild",
   "main": "index.js",
   "scripts": {
