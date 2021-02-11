@@ -47,6 +47,7 @@ function registerRuleOnResolve(ruleMeta, build) {
     log(ruleMeta.namespace, 'is regexp rule');
 
     // we do not register 'file' namespace here, because the root file won't be processed
+    // https://github.com/evanw/esbuild/issues/791
     build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta));
     return;
   }
@@ -69,7 +70,7 @@ function buildResolveCallback(ruleMeta) {
   log('Build onResolve callback for rule with namespace', ruleMeta.namespace);
 
   return args => {
-    log('Run onResolve callback for file', args.path, 'with namespace', ruleMeta.namespace);
+    log('Run onResolve callback for file', args.path, 'with predefined namespace', args.namespace);
 
     if (args.path.includes('!')) {
       throw new Error(`Can not load '${args.path}'. Inline loaders are not supported yet.`);
@@ -86,14 +87,14 @@ function registerRuleOnLoad(ruleMeta, build) {
   log('Register onLoad for the rule with namespace', ruleMeta.namespace);
 
   build.onLoad({ filter: /.*/, namespace: ruleMeta.namespace }, async (args) => new Promise(resolve => {
-    log('Run loaders for', args.path, 'using rule with namespace', ruleMeta.namespace);
+    log('Run loaders for', args.path, 'using rule with namespace', args.namespace);
 
     runLoaders({
       resource: args.path,
       loaders: ruleMeta.use,
     }, (err, res) => {
       if (err) {
-        log('Error occurred while running loaders for', args.path, 'using rule with namespace', ruleMeta.namespace);
+        log('Error occurred while running loaders for', args.path, 'using rule with namespace', args.namespace);
 
         // TODO: add more info?
         // https://nodejs.org/api/errors.html
@@ -107,7 +108,7 @@ function registerRuleOnLoad(ruleMeta, build) {
         });
       }
 
-      log('Complete running loaders for', args.path, 'using rule with namespace', ruleMeta.namespace);
+      log('Complete running loaders for', args.path, 'using rule with namespace', args.namespace);
 
       return resolve({
         // TODO: https://github.com/webpack/loader-runner
