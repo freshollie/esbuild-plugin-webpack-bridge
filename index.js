@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const { runLoaders } = require('loader-runner');
 const { getOptions } = require('loader-utils');
@@ -92,13 +93,22 @@ function registerRuleOnLoad(ruleMeta, build) {
   build.onLoad({ filter: /.*/, namespace: ruleMeta.namespace }, async (args) => new Promise(resolve => {
     log('Run loaders for', args.path, 'using rule with namespace', args.namespace);
 
+    const context = {
+      getResolve, // sass-loader
+      fs, // postcss-loader
+    };
+
+    // a lot of loaders use it, e.g. postcss-loader
+    // but current webpack version of getOptions implements schema check: https://github.com/webpack/webpack/blob/2acc6c48b62fcad91b29b58688a998cf52bf82a0/lib/NormalModule.js#L395
+    // while getOptions from loader-utils expects context as a first param: https://github.com/webpack/loader-utils#getoptions
+    // so we bind it
+    // TODO: implement schema check?
+    context.getOptions = getOptions.bind(null, context);
+
     runLoaders({
       resource: args.path,
       loaders: ruleMeta.use,
-      context: {
-        getOptions,
-        getResolve,
-      },
+      context,
     }, (err, res) => {
       if (err) {
         log('Error occurred while running loaders for', args.path, 'using rule with namespace', args.namespace);

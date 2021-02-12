@@ -92,9 +92,11 @@ describe('Main tests', () => {
         done(err);
       });
   });
+});
 
-  it('should work with scss', done => {
-    const folder = 'scss';
+describe('Loaders', () => {
+  it('should work with sass-loader', done => {
+    const folder = 'sass-loader';
     const outputJS = readFixture(folder, 'output.js');
     const outputCSS = readFixture(folder, 'output.css');
 
@@ -117,6 +119,55 @@ describe('Main tests', () => {
                     loader: 'sass-loader',
                     options: {
                       implementation: require('sass'),
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.deepStrictEqual(res.outputFiles[0].text, outputJS);
+        assert.deepStrictEqual(res.outputFiles[1].text, outputCSS);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+  });
+
+  it('should work with postcss-loader', done => {
+    const folder = 'postcss-loader';
+    const outputJS = readFixture(folder, 'output.js');
+    const outputCSS = readFixture(folder, 'output.css');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      outdir: 'outdir',
+      plugins: [
+        bridgePlugin({
+          module: {
+            rules: [
+              {
+                test: /\.css$/,
+                esbuildLoader: 'css',
+                use: [
+                  {
+                    loader: 'postcss-loader',
+                    options: {
+                      postcssOptions: {
+                        plugins: [
+                          require('autoprefixer')({
+                            overrideBrowserslist: ['> 1%', 'android >= 4.4.4', 'ios >= 9'],
+                          }),
+                        ],
+                      },
                     },
                   },
                 ],
