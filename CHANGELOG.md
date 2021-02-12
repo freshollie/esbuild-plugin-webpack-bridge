@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 (12.02.2021)
+
+Implemented shims to make postcss-loader work.
+
+
 ## 0.2.1 (12.02.2021)
 
 Removed postinstall hook that crashed installation process.
