@@ -26,7 +26,7 @@ let ruleCounter = 1;
 function buildRuleMeta(rule) {
   log('Build meta for rule', ruleCounter);
 
-  const supportedRuleProperties = ['test', 'use', 'esbuildLoader'];
+  const supportedRuleProperties = ['test', 'use', 'loader', 'esbuildLoader'];
 
   if (Object.keys(rule).some(key => !supportedRuleProperties.includes(key))) {
     throw new Error(`Rule properties other than '${supportedRuleProperties.join(', ')}' are not supported yet.`);
@@ -39,7 +39,7 @@ function buildRuleMeta(rule) {
   return {
     namespace,
     test: rule.test,
-    use: rule.use,
+    use: rule.loader ? [rule.loader] : rule.use,
     loader: rule.esbuildLoader,
   };
 }

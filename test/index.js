@@ -129,6 +129,39 @@ describe('Main tests', () => {
         done(err);
       });
   });
+
+  it('should work with rule.loader property', done => {
+    const folder = 'loader-property';
+    const output = readFixture(folder, 'output.js');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      plugins: [
+        bridgePlugin({
+          module: {
+            rules: [
+              {
+                test: /\.js$/,
+                esbuildLoader: 'js',
+                loader: 'babel-loader',
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+  });
 });
 
 describe('Loaders', () => {
