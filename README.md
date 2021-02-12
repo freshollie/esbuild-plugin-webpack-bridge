@@ -25,6 +25,7 @@ npm install --save-dev esbuild-plugin-webpack-bridge
 Define plugin in the `plugins` section of esbuild config like this:
 
 ```js
+const path = require('path');
 const esbuild = require('esbuild');
 const webpackBridge = require('esbuild-plugin-webpack-bridge');
 
@@ -32,6 +33,12 @@ esbuild.build({
   // ...
   plugins: [
     webpackBridge({
+      output: {
+        path: path.resolve(__dirname, 'public'),
+      },
+      resolve: {
+        modules: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'node_modules')],
+      },
       module: {
         rules: [
           {
@@ -77,3 +84,4 @@ Probably works correctly:
 - [babel-loader](https://github.com/babel/babel-loader)
 - [sass-loader](https://github.com/webpack-contrib/sass-loader/)
 - [postcss-loader](https://github.com/webpack-contrib/postcss-loader)
+- [file-loader](https://github.com/webpack-contrib/file-loader)

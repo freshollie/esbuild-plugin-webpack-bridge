@@ -6,7 +6,11 @@ const { getOptions } = require('loader-utils');
 const enhancedResolve = require('enhanced-resolve');
 
 module.exports = (options = {}) => {
-  const { module: { rules = [] } = {} } = options;
+  const {
+    output: { path: outputPath } = {},
+    resolve: { modules = [] } = {},
+    module: { rules = [] } = {},
+  } = options;
 
   return {
     name: 'webpack-bridge',
@@ -15,8 +19,8 @@ module.exports = (options = {}) => {
 
       for (let i = 0; i < rules.length; i++) {
         const meta = buildRuleMeta(rules[i]);
-        registerRuleOnResolve(meta, build);
-        registerRuleOnLoad(meta, build);
+        registerRuleOnResolve(meta, modules, build);
+        registerRuleOnLoad(meta, outputPath, build);
       }
     },
   };
@@ -44,7 +48,7 @@ function buildRuleMeta(rule) {
   };
 }
 
-function registerRuleOnResolve(ruleMeta, build) {
+function registerRuleOnResolve(ruleMeta, resolveModules, build) {
   log('Register onResolve for the rule with namespace', ruleMeta.namespace);
 
   if (ruleMeta.test instanceof RegExp) {
@@ -52,7 +56,7 @@ function registerRuleOnResolve(ruleMeta, build) {
 
     // we do not register 'file' namespace here, because the root file won't be processed
     // https://github.com/evanw/esbuild/issues/791
-    build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta));
+    build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta, resolveModules));
     return;
   }
 
@@ -70,7 +74,7 @@ function registerRuleOnResolve(ruleMeta, build) {
   // console.warn('`test` property of webpack rules should be RegExp. Other types make ESBuild slower. Read more: https://esbuild.github.io/plugins/#filters');
 }
 
-function buildResolveCallback(ruleMeta) {
+function buildResolveCallback(ruleMeta, resolveModules) {
   log('Build onResolve callback for rule with namespace', ruleMeta.namespace);
 
   return args => {
@@ -80,24 +84,40 @@ function buildResolveCallback(ruleMeta) {
       throw new Error(`Can not load '${args.path}'. Inline loaders are not supported yet.`);
     }
 
+    let resolvedPath;
+
+    if (args.path.match(/^\.\.?\//)) {
+      resolvedPath = enhancedResolve.sync(args.resolveDir, args.path);
+    } else if (!resolveModules.length) {
+      resolvedPath = enhancedResolve.sync(args.resolveDir, args.path);
+    } else {
+      const resolver = enhancedResolve.create.sync({
+        modules: resolveModules,
+      });
+      resolvedPath = resolver(args.resolveDir, args.path);
+    }
+
     return {
-      path: args.path.match(/^\.\.?\//)
-        ? path.resolve(args.resolveDir, args.path)
-        : require.resolve(args.path),
+      path: resolvedPath,
       namespace: ruleMeta.namespace,
     };
   };
 }
 
-function registerRuleOnLoad(ruleMeta, build) {
+function registerRuleOnLoad(ruleMeta, outputPath, build) {
   log('Register onLoad for the rule with namespace', ruleMeta.namespace);
 
   build.onLoad({ filter: /.*/, namespace: ruleMeta.namespace }, async (args) => new Promise(resolve => {
     log('Run loaders for', args.path, 'using rule with namespace', args.namespace);
 
     const context = {
+      // TODO: add mode?
+      // https://github.com/webpack/webpack/blob/2acc6c48b62fcad91b29b58688a998cf52bf82a0/lib/NormalModule.js#L508
       getResolve, // sass-loader
       fs, // postcss-loader
+      rootContext: args.path,
+      emitFile: (name, content) => fs.promises.mkdir(path.dirname(path.resolve(outputPath, name)), { recursive: true })
+        .then(() => fs.promises.writeFile(path.resolve(outputPath, name), content)),
     };
 
     // a lot of loaders use it, e.g. postcss-loader
