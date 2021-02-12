@@ -81,7 +81,9 @@ function buildResolveCallback(ruleMeta) {
     }
 
     return {
-      path: path.resolve(args.resolveDir, args.path),
+      path: args.path.match(/^\.\.?\//)
+        ? path.resolve(args.resolveDir, args.path)
+        : require.resolve(args.path),
       namespace: ruleMeta.namespace,
     };
   };

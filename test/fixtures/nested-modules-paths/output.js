@@ -1,0 +1,1 @@
+(()=>{var t=(o,e)=>()=>(e||(e={exports:{}},o(e.exports,e)),e.exports);var s=t((l,r)=>{r.exports={extends:"./index.js",globals:{after:!0,afterEach:!0,before:!0,beforeEach:!0,browser:!0,casper:!0,describe:!0,expect:!0,it:!0,xit:!0},plugins:["@funboxteam/eslint-plugin-no-only-tests"],rules:{"@funboxteam/no-only-tests/no-only":2}}});var n=t((a,u)=>{u.exports=s()});n();})();
