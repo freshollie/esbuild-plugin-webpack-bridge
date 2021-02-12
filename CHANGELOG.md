@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 (12.02.2021)
+
+Added support for [`Rule.loader`](https://webpack.js.org/configuration/module/#ruleloader) property.
+
+
 ## 0.3.1 (12.02.2021)
 
 Fixed paths resolution for nested modules imports.
