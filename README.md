@@ -69,3 +69,11 @@ esbuild.build({
 
 **Note:** the plugin is currently under development, so the API may change during the time. Also there're not 
 so many loaders' features supported. Please, check [test/](test) folder for more examples. 
+
+## List of tested loaders
+
+Probably works correctly:
+
+- [babel-loader](https://github.com/babel/babel-loader)
+- [sass-loader](https://github.com/webpack-contrib/sass-loader/)
+- [postcss-loader](https://github.com/webpack-contrib/postcss-loader)
