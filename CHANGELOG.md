@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 (12.02.2021)
+
+Fixed paths resolution for nested modules imports.
+
+
 ## 0.3.0 (12.02.2021)
 
 Implemented shims to make postcss-loader work.
