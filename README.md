@@ -100,8 +100,9 @@ Check [test/](test) folder for more examples.
 Probably works correctly:
 
 - [babel-loader](https://github.com/babel/babel-loader)
-- [sass-loader](https://github.com/webpack-contrib/sass-loader/)
+- [null-loader](https://github.com/webpack-contrib/null-loader)
 - [postcss-loader](https://github.com/webpack-contrib/postcss-loader)
+- [sass-loader](https://github.com/webpack-contrib/sass-loader/)
 
 ## List of loaders that won't be supported
 
