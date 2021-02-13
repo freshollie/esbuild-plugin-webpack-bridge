@@ -4,16 +4,16 @@ const fs = require('fs');
 const { runLoaders } = require('loader-runner');
 const { getOptions } = require('loader-utils');
 const enhancedResolve = require('enhanced-resolve');
-
 const { validate } = require('schema-utils');
+
 const optionsSchema = require('./options-schema.json');
 
 module.exports = (options = {}) => {
+  log('Validate options');
+
   validate(optionsSchema, options);
 
-  const {
-    module: { rules = [] } = {},
-  } = options;
+  const rules = options.module.rules;
 
   return {
     name: 'webpack-bridge',
@@ -33,12 +33,6 @@ let ruleCounter = 1;
 function buildRuleMeta(rule) {
   log('Build meta for rule', ruleCounter);
 
-  const supportedRuleProperties = ['test', 'use', 'loader', 'esbuildLoader'];
-
-  if (Object.keys(rule).some(key => !supportedRuleProperties.includes(key))) {
-    throw new Error(`Rule properties other than '${supportedRuleProperties.join(', ')}' are not supported yet.`);
-  }
-
   const namespace = `rule-${ruleCounter++}-${rule.test.toString()}`;
 
   log('Generated namespace for the rule:', namespace);
@@ -54,14 +48,14 @@ function buildRuleMeta(rule) {
 function registerRuleOnResolve(ruleMeta, loaderOptions, build) {
   log('Register onResolve for the rule with namespace', ruleMeta.namespace);
 
-  if (ruleMeta.test instanceof RegExp) {
-    log(ruleMeta.namespace, 'is regexp rule');
+  // if (ruleMeta.test instanceof RegExp) {
+  log(ruleMeta.namespace, 'is regexp rule');
 
-    // we do not register 'file' namespace here, because the root file won't be processed
-    // https://github.com/evanw/esbuild/issues/791
-    build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta, loaderOptions));
-    return;
-  }
+  // we do not register 'file' namespace here, because the root file won't be processed
+  // https://github.com/evanw/esbuild/issues/791
+  build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta, loaderOptions));
+  // return;
+  // }
 
   // if (typeof ruleMeta.test === 'string') {
   //   log(ruleMeta.namespace, 'is string rule');
@@ -73,7 +67,6 @@ function registerRuleOnResolve(ruleMeta, loaderOptions, build) {
   //   return;
   // }
 
-  throw new Error('\'test\' property of webpack rules should be RegExp. Other types are not supported yet.\'');
   // console.warn('`test` property of webpack rules should be RegExp. Other types make ESBuild slower. Read more: https://esbuild.github.io/plugins/#filters');
 }
 
