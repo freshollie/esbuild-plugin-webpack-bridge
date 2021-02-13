@@ -46,7 +46,7 @@ describe('Main tests', () => {
       ],
     })
       .then(res => {
-        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        assert.strictEqual(output.compare(res.outputFiles[0].contents), 0);
         done();
       })
       .catch(err => {
@@ -91,7 +91,7 @@ describe('Main tests', () => {
       ],
     })
       .then(res => {
-        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        assert.strictEqual(output.compare(res.outputFiles[0].contents), 0);
         done();
       })
       .catch(err => {
@@ -131,7 +131,7 @@ describe('Main tests', () => {
       ],
     })
       .then(res => {
-        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        assert.strictEqual(output.compare(res.outputFiles[0].contents), 0);
         done();
       })
       .catch(err => {
@@ -167,7 +167,7 @@ describe('Main tests', () => {
       ],
     })
       .then(res => {
-        assert.deepStrictEqual(res.outputFiles[0].text, output);
+        assert.strictEqual(output.compare(res.outputFiles[0].contents), 0);
         done();
       })
       .catch(err => {
@@ -214,8 +214,8 @@ describe('Loaders', () => {
       ],
     })
       .then(res => {
-        assert.deepStrictEqual(res.outputFiles[0].text, outputJS);
-        assert.deepStrictEqual(res.outputFiles[1].text, outputCSS);
+        assert.strictEqual(outputJS.compare(res.outputFiles[0].contents), 0);
+        assert.strictEqual(outputCSS.compare(res.outputFiles[1].contents), 0);
         done();
       })
       .catch(err => {
@@ -266,8 +266,8 @@ describe('Loaders', () => {
       ],
     })
       .then(res => {
-        assert.deepStrictEqual(res.outputFiles[0].text, outputJS);
-        assert.deepStrictEqual(res.outputFiles[1].text, outputCSS);
+        assert.strictEqual(outputJS.compare(res.outputFiles[0].contents), 0);
+        assert.strictEqual(outputCSS.compare(res.outputFiles[1].contents), 0);
         done();
       })
       .catch(err => {
@@ -277,5 +277,5 @@ describe('Loaders', () => {
 });
 
 function readFixture(...pathParts) {
-  return fs.readFileSync(resolveFixture(...pathParts), 'utf-8');
+  return fs.readFileSync(resolveFixture(...pathParts));
 }
