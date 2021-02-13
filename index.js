@@ -39,8 +39,8 @@ function buildRuleMeta(rule) {
 
   return {
     namespace,
-    test: rule.test,
-    use: rule.loader ? [rule.loader] : rule.use,
+    filter: rule.test,
+    loaders: rule.loader ? [rule.loader] : rule.use,
     loader: rule.esbuildLoader,
   };
 }
@@ -53,7 +53,7 @@ function registerRuleOnResolve(ruleMeta, loaderOptions, build) {
 
   // we do not register 'file' namespace here, because the root file won't be processed
   // https://github.com/evanw/esbuild/issues/791
-  build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta, loaderOptions));
+  build.onResolve({ filter: ruleMeta.filter }, buildResolveCallback(ruleMeta, loaderOptions));
   // return;
   // }
 
@@ -129,7 +129,7 @@ function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
 
     runLoaders({
       resource: args.path,
-      loaders: ruleMeta.use,
+      loaders: ruleMeta.loaders,
       context,
     }, (err, res) => {
       if (err) {
