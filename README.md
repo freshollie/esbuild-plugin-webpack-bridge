@@ -109,3 +109,9 @@ Probably works correctly:
 
 - [file-loader](https://github.com/webpack-contrib/file-loader). Because currently esbuild does not have an API 
   that allows to tell the bundler where the loaded file is placed by the loader.
+
+## Contributing
+
+The plugin is under development, so any PR is highly welcomed. But if you're going to implement something that
+changes current API or may take a lot of your time to develop, please, open an issue first. 
+Just to notify me about your intentions. 
