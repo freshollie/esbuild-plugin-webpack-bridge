@@ -310,6 +310,58 @@ describe('Loaders', () => {
         done(err);
       });
   });
+
+  it('should work with resolve-url-loader', done => {
+    const folder = 'resolve-url-loader';
+    const outputJS = readFixture(folder, 'output.js');
+    const outputCSS = readFixture(folder, 'output.css');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      outdir: 'outdir',
+      loader: {
+        '.jpg': 'file',
+      },
+      plugins: [
+        bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
+          module: {
+            rules: [
+              {
+                test: /\.scss$/,
+                esbuildLoader: 'css',
+                use: [
+                  'resolve-url-loader',
+                  {
+                    loader: 'sass-loader',
+                    options: {
+                      sourceMap: true,
+                      implementation: require('sass'),
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.strictEqual(outputJS.compare(res.outputFiles[0].contents), 0);
+        assert.strictEqual(/\/outdir\/bg\..+\.jpg$/.test(res.outputFiles[1].path), true);
+        assert.strictEqual(outputCSS.compare(res.outputFiles[2].contents), 0);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+  });
 });
 
 function readFixture(...pathParts) {
