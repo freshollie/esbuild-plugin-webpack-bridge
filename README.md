@@ -21,7 +21,6 @@ npm install --save-dev esbuild-plugin-webpack-bridge
 
 ## Usage
 
-
 Define plugin in the `plugins` section of esbuild config like this:
 
 ```js
@@ -33,17 +32,29 @@ esbuild.build({
   // ...
   plugins: [
     webpackBridge({
+      // output.path is used by file-loader and others, so it's required
       output: {
         path: path.resolve(__dirname, 'public'),
       },
+      
+      // resolve.modules should be set then the same option was used in webpack config
+      // e.g. when your project was set up for path relative to the some non-root folder
       resolve: {
         modules: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'node_modules')],
       },
+      
       module: {
         rules: [
           {
-            test: /\.jsx?$/,
+            // only regexps are supported by now
+            test: /\.js$/,
+            
+            // required option that sets final loader on the esbuild side that will be used
+            // read more about esbuild loaders:
+            // https://esbuild.github.io/content-types/
             esbuildLoader: 'js',
+            
+            // `use` or `loader` might be used here
             use: [
               {
                 loader: 'babel-loader',
@@ -74,8 +85,15 @@ esbuild.build({
 })
 ```
 
-**Note:** the plugin is currently under development, so the API may change during the time. Also there're not 
-so many loaders' features supported. Please, check [test/](test) folder for more examples. 
+## Important notes
+
+The plugin is currently under development, so the API may change during the time. Also there're not 
+so many loaders' features supported, see the list below.
+
+Only the latest major version of each loader is tested, which, most of the time, means that it should work with webpack@4 
+and sometimes with webpack@5.
+
+Check [test/](test) folder for more examples. 
 
 ## List of tested loaders
 
