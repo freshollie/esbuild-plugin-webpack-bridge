@@ -102,8 +102,10 @@ Probably works correctly:
 - [babel-loader](https://github.com/babel/babel-loader)
 - [null-loader](https://github.com/webpack-contrib/null-loader)
 - [postcss-loader](https://github.com/webpack-contrib/postcss-loader)
-- [sass-loader](https://github.com/webpack-contrib/sass-loader/)
+- [resolve-url-loader](https://github.com/bholloway/resolve-url-loader)
+- [sass-loader](https://github.com/webpack-contrib/sass-loader)
 
 ## List of loaders that won't be supported
 
-- [file-loader](https://github.com/webpack-contrib/file-loader/)
+- [file-loader](https://github.com/webpack-contrib/file-loader). Because currently esbuild does not have an API 
+  that allows to tell the bundler where the loaded file is placed by the loader.
