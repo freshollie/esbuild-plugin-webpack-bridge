@@ -102,3 +102,7 @@ Probably works correctly:
 - [babel-loader](https://github.com/babel/babel-loader)
 - [sass-loader](https://github.com/webpack-contrib/sass-loader/)
 - [postcss-loader](https://github.com/webpack-contrib/postcss-loader)
+
+## List of loaders that won't be supported
+
+- [file-loader](https://github.com/webpack-contrib/file-loader/)
