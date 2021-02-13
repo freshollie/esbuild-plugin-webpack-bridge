@@ -5,10 +5,13 @@ const { runLoaders } = require('loader-runner');
 const { getOptions } = require('loader-utils');
 const enhancedResolve = require('enhanced-resolve');
 
+const { validate } = require('schema-utils');
+const optionsSchema = require('./options-schema.json');
+
 module.exports = (options = {}) => {
+  validate(optionsSchema, options);
+
   const {
-    output: { path: outputPath } = {},
-    resolve: { modules = [] } = {},
     module: { rules = [] } = {},
   } = options;
 
@@ -19,8 +22,8 @@ module.exports = (options = {}) => {
 
       for (let i = 0; i < rules.length; i++) {
         const meta = buildRuleMeta(rules[i]);
-        registerRuleOnResolve(meta, modules, build);
-        registerRuleOnLoad(meta, outputPath, build);
+        registerRuleOnResolve(meta, options, build);
+        registerRuleOnLoad(meta, options, build);
       }
     },
   };
@@ -48,7 +51,7 @@ function buildRuleMeta(rule) {
   };
 }
 
-function registerRuleOnResolve(ruleMeta, resolveModules, build) {
+function registerRuleOnResolve(ruleMeta, loaderOptions, build) {
   log('Register onResolve for the rule with namespace', ruleMeta.namespace);
 
   if (ruleMeta.test instanceof RegExp) {
@@ -56,7 +59,7 @@ function registerRuleOnResolve(ruleMeta, resolveModules, build) {
 
     // we do not register 'file' namespace here, because the root file won't be processed
     // https://github.com/evanw/esbuild/issues/791
-    build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta, resolveModules));
+    build.onResolve({ filter: ruleMeta.test }, buildResolveCallback(ruleMeta, loaderOptions));
     return;
   }
 
@@ -74,7 +77,9 @@ function registerRuleOnResolve(ruleMeta, resolveModules, build) {
   // console.warn('`test` property of webpack rules should be RegExp. Other types make ESBuild slower. Read more: https://esbuild.github.io/plugins/#filters');
 }
 
-function buildResolveCallback(ruleMeta, resolveModules) {
+function buildResolveCallback(ruleMeta, loaderOptions) {
+  const { resolve: { modules: resolveModules = [] } = {} } = loaderOptions;
+
   log('Build onResolve callback for rule with namespace', ruleMeta.namespace);
 
   return args => {
@@ -104,8 +109,10 @@ function buildResolveCallback(ruleMeta, resolveModules) {
   };
 }
 
-function registerRuleOnLoad(ruleMeta, outputPath, build) {
+function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
   log('Register onLoad for the rule with namespace', ruleMeta.namespace);
+
+  const { output: { path: outputPath = '' } = {} } = loaderOptions;
 
   build.onLoad({ filter: /.*/, namespace: ruleMeta.namespace }, async (args) => new Promise(resolve => {
     log('Run loaders for', args.path, 'using rule with namespace', args.namespace);

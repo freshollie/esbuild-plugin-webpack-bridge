@@ -28,7 +28,8 @@
   "dependencies": {
     "enhanced-resolve": "5.7.0",
     "loader-runner": "4.2.0",
-    "loader-utils": "2.0.0"
+    "loader-utils": "2.0.0",
+    "schema-utils": "3.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.12.13",

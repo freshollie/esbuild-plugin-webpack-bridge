@@ -1,0 +1,228 @@
+{
+  "description": "Options object as provided by the user (the schema is partially derived from https://github.com/webpack/webpack/blob/master/schemas/WebpackOptions.json)",
+  "definitions":{
+    "ModuleOptions": {
+      "description": "Options affecting the normal modules (`NormalModuleFactory`).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "description": "An array of rules applied for modules.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/RuleSetRules"
+            }
+          ]
+        }
+      },
+      "required": ["rules"]
+    },
+    "Output": {
+      "description": "Options affecting the output of the compilation. `output` options tell webpack how to write the compiled files to disk.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "$ref": "#/definitions/Path"
+        }
+      },
+      "required": ["path"]
+    },
+    "Path": {
+      "description": "The output directory as **absolute path** (required).",
+      "type": "string"
+    },
+    "Resolve": {
+      "description": "Options for the resolver.",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/ResolveOptions"
+        }
+      ]
+    },
+    "ResolveOptions": {
+      "description": "Options object for resolving requests.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "modules": {
+          "description": "Folder names or directory paths where to find modules.",
+          "type": "array",
+          "items": {
+            "description": "Folder name or directory path where to find modules.",
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "RuleSetRules": {
+      "description": "A list of rules.",
+      "type": "array",
+      "items": {
+        "description": "A rule.",
+        "anyOf": [
+          {
+            "$ref": "#/definitions/RuleSetRule"
+          }
+        ]
+      }
+    },
+    "RuleSetRule": {
+      "description": "A rule description with conditions and effects for modules.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "loader": {
+          "description": "Shortcut for use.loader.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/RuleSetLoader"
+            }
+          ]
+        },
+        "options": {
+          "description": "Shortcut for use.options.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/RuleSetLoaderOptions"
+            }
+          ]
+        },
+        "test": {
+          "description": "Shortcut for resource.test.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/RuleSetConditionOrConditionsAbsolute"
+            }
+          ]
+        },
+        "esbuildLoader": {
+          "description": "esbuild loader name.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/RuleSetEsbuildLoader"
+            }
+          ]
+        },
+        "use": {
+          "description": "Modifiers applied to the module when rule is matched.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/RuleSetUse"
+            }
+          ]
+        }
+      }
+    },
+    "RuleSetLoader": {
+      "description": "A webpack loader request.",
+      "type": "string",
+      "minLength": 1
+    },
+    "RuleSetEsbuildLoader": {
+      "description": "A esbuild loader request.",
+      "type": "string",
+      "minLength": 1
+    },
+    "RuleSetLoaderOptions": {
+      "description": "Options passed to a loader.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "RuleSetConditionOrConditionsAbsolute": {
+      "description": "One or multiple rule conditions matching an absolute path.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RuleSetConditionAbsolute"
+        }
+      ]
+    },
+    "RuleSetUse": {
+      "description": "A list of descriptions of loaders applied.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "description": "An use item.",
+            "oneOf": [
+              {
+                "$ref": "#/definitions/RuleSetUseItem"
+              }
+            ]
+          }
+        },
+        {
+          "instanceof": "Function",
+          "tsType": "((data: { resource: string, realResource: string, resourceQuery: string, issuer: string, compiler: string }) => RuleSetUseItem[])"
+        },
+        {
+          "$ref": "#/definitions/RuleSetUseItem"
+        }
+      ]
+    },
+    "RuleSetUseItem": {
+      "description": "A description of an applied loader.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "loader": {
+              "description": "Loader name.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/RuleSetLoader"
+                }
+              ]
+            },
+            "options": {
+              "description": "Loader options.",
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/RuleSetLoaderOptions"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "instanceof": "Function",
+          "tsType": "((data: object) => RuleSetUseItem|RuleSetUseItem[])"
+        },
+        {
+          "$ref": "#/definitions/RuleSetLoader"
+        }
+      ]
+    },
+    "RuleSetConditionAbsolute": {
+      "description": "A condition matcher matching an absolute path.",
+      "anyOf": [
+        {
+          "instanceof": "RegExp",
+          "tsType": "RegExp"
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "module": {
+      "$ref": "#/definitions/ModuleOptions"
+    },
+    "output": {
+      "$ref": "#/definitions/Output"
+    },
+    "resolve": {
+      "$ref": "#/definitions/Resolve"
+    }
+  },
+  "required": ["output", "module"]
+}

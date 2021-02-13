@@ -21,6 +21,9 @@ describe('Main tests', () => {
       bundle: true,
       plugins: [
         bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
           module: {
             rules: [
               {
@@ -63,6 +66,9 @@ describe('Main tests', () => {
       bundle: true,
       plugins: [
         bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
           module: {
             rules: [
               {
@@ -105,6 +111,9 @@ describe('Main tests', () => {
       bundle: true,
       plugins: [
         bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
           module: {
             rules: [
               {
@@ -142,6 +151,9 @@ describe('Main tests', () => {
       bundle: true,
       plugins: [
         bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
           module: {
             rules: [
               {
@@ -179,6 +191,9 @@ describe('Loaders', () => {
       outdir: 'outdir',
       plugins: [
         bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
           module: {
             rules: [
               {
@@ -222,6 +237,9 @@ describe('Loaders', () => {
       outdir: 'outdir',
       plugins: [
         bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
           module: {
             rules: [
               {
