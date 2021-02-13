@@ -274,6 +274,52 @@ describe('Loaders', () => {
         done(err);
       });
   });
+
+  it.only('should work with file-loader', done => {
+    const folder = 'file-loader';
+    const outputJS = readFixture(folder, 'output.js');
+    const outputCSS = readFixture(folder, 'output.css');
+    const outputJPEG = readFixture(folder, 'bg.jpg');
+    const outputTXT = readFixture(folder, 'robots.txt');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      outdir: 'outdir',
+      plugins: [
+        bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
+          module: {
+            rules: [
+              {
+                test: /\.(jpg|txt)$/,
+                esbuildLoader: 'js',
+                loader: 'file-loader',
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        console.log(res.outputFiles.map(x => x.text))
+        assert.strictEqual(outputTXT.compare(res.outputFiles[0].contents), 0);
+        assert.strictEqual(outputJS.compare(res.outputFiles[1].contents), 0);
+        assert.strictEqual(outputJPEG.compare(res.outputFiles[2].contents), 0);
+        assert.strictEqual(outputCSS.compare(res.outputFiles[3].contents), 0);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+  });
+
+  // TODO: add test for resolve.modules
 });
 
 function readFixture(...pathParts) {
