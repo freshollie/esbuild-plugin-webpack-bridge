@@ -1,10 +1,10 @@
 const path = require('path');
-const fs = require('fs');
 
 const { runLoaders } = require('loader-runner');
-const { getOptions } = require('loader-utils');
 const enhancedResolve = require('enhanced-resolve');
 const { validate } = require('schema-utils');
+
+const buildContext = require('./lib/build-context');
 
 const optionsSchema = require('./options-schema.json');
 
@@ -105,27 +105,10 @@ function buildResolveCallback(ruleMeta, loaderOptions) {
 function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
   log('Register onLoad for the rule with namespace', ruleMeta.namespace);
 
-  const { output: { path: outputPath = '' } = {} } = loaderOptions;
-
   build.onLoad({ filter: /.*/, namespace: ruleMeta.namespace }, async (args) => new Promise(resolve => {
     log('Run loaders for', args.path, 'using rule with namespace', args.namespace);
 
-    const context = {
-      // TODO: add mode?
-      // https://github.com/webpack/webpack/blob/2acc6c48b62fcad91b29b58688a998cf52bf82a0/lib/NormalModule.js#L508
-      getResolve, // sass-loader
-      fs, // postcss-loader
-      rootContext: args.path,
-      emitFile: (name, content) => fs.promises.mkdir(path.dirname(path.resolve(outputPath, name)), { recursive: true })
-        .then(() => fs.promises.writeFile(path.resolve(outputPath, name), content)),
-    };
-
-    // a lot of loaders use it, e.g. postcss-loader
-    // but current webpack version of getOptions implements schema check: https://github.com/webpack/webpack/blob/2acc6c48b62fcad91b29b58688a998cf52bf82a0/lib/NormalModule.js#L395
-    // while getOptions from loader-utils expects context as a first param: https://github.com/webpack/loader-utils#getoptions
-    // so we bind it
-    // TODO: implement schema check?
-    context.getOptions = getOptions.bind(null, context);
+    const context = buildContext(ruleMeta, args, loaderOptions);
 
     runLoaders({
       resource: args.path,
@@ -134,10 +117,6 @@ function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
     }, (err, res) => {
       if (err) {
         log('Error occurred while running loaders for', args.path, 'using rule with namespace', args.namespace);
-
-        // TODO: add more info?
-        // https://nodejs.org/api/errors.html
-        // https://github.com/webpack/loader-runner/blob/master/lib/LoaderLoadingError.js
 
         return resolve({
           errors: [{
@@ -164,33 +143,6 @@ function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
 //   // $& means the whole matched string
 //   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // }
-
-// sass-loader relies on this context method:
-// https://github.com/webpack-contrib/sass-loader/blob/58858f577fb89c9d6bcdfd2874230edf332123c0/src/utils.js#L464
-// https://github.com/webpack-contrib/sass-loader/blob/58858f577fb89c9d6bcdfd2874230edf332123c0/src/utils.js#L354-L368
-// https://webpack.js.org/api/loaders/#thisgetresolve
-// webpack uses inside enhanced-resolve module:
-// https://github.com/webpack/webpack/blob/2acc6c48b62fcad91b29b58688a998cf52bf82a0/lib/ResolverFactory.js
-// so we are
-function getResolve(options) {
-  const resolver = enhancedResolve.create(options);
-
-  return (context, request, callback) => {
-    if (callback) {
-      return resolver(context, request, callback);
-    }
-
-    return new Promise((resolve, reject) => {
-      resolver(context, request, (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(result);
-      });
-    });
-  };
-}
 
 function log(...args) {
   if (process.env.DEBUG) {
