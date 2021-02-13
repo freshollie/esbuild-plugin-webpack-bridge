@@ -41,7 +41,7 @@ function buildRuleMeta(rule) {
     namespace,
     filter: rule.test,
     loaders: rule.loader ? [rule.loader] : rule.use,
-    loader: rule.esbuildLoader,
+    esbuildLoader: rule.esbuildLoader,
   };
 }
 
@@ -133,7 +133,7 @@ function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
         //  according to the doc result should be Buffer or String, but it's an array with String inside. why?
         contents: res.result[0],
         resolveDir: path.dirname(args.path),
-        loader: ruleMeta.loader,
+        loader: ruleMeta.esbuildLoader,
       });
     });
   }));
