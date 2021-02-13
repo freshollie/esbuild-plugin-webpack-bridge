@@ -274,6 +274,42 @@ describe('Loaders', () => {
         done(err);
       });
   });
+
+  it('should work with null-loader', done => {
+    const folder = 'null-loader';
+    const output = readFixture(folder, 'output.js');
+
+    esbuild.build({
+      entryPoints: [resolveFixture(folder, 'input.js')],
+      nodePaths: [resolveFixture(folder)],
+      write: false,
+      minify: true,
+      bundle: true,
+      plugins: [
+        bridgePlugin({
+          output: {
+            path: 'outdir',
+          },
+          module: {
+            rules: [
+              {
+                test: /\.js$/,
+                esbuildLoader: 'js',
+                loader: 'null-loader',
+              },
+            ],
+          },
+        }),
+      ],
+    })
+      .then(res => {
+        assert.strictEqual(output.compare(res.outputFiles[0].contents), 0);
+        done();
+      })
+      .catch(err => {
+        done(err);
+      });
+  });
 });
 
 function readFixture(...pathParts) {
