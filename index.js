@@ -131,6 +131,7 @@ function registerRuleOnLoad(ruleMeta, loaderOptions, build) {
       return resolve({
         // TODO: https://github.com/webpack/loader-runner
         //  according to the doc result should be Buffer or String, but it's an array with String inside. why?
+        //  https://github.com/webpack/loader-runner/issues/51
         contents: res.result[0],
         resolveDir: path.dirname(args.path),
         loader: ruleMeta.esbuildLoader,
